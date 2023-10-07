@@ -100,11 +100,11 @@ class QC_tests(QCtestBase):
             plt.colorbar(mappable, ax=ax, label=self.data_container.hdul[1].header.get(
             'BUNIT', "Unknown BUNIT"), location='left')
         output = os.path.join(self.output, "raw_image.png")
-        fig.savefig(output,
-                    bbox_inches='tight')
+        fig.savefig(output, bbox_inches='tight')
         plt.close(fig)
         if self.html:
-            self.html_page.add_plot_section("Raw display", output)
+            self.html_page.add_plot_section(
+                "Raw display", os.path.basename(output))
         return output
 
     def check_histogram(self):
@@ -138,56 +138,5 @@ class QC_tests(QCtestBase):
         fig.savefig(output, bbox_inches='tight')
         plt.close(fig)
         if self.html:
-            self.html_page.add_plot_section("Raw histogram", output)
+            self.html_page.add_plot_section("Raw histogram", os.path.basename(output))
         return output
-        
-            
-        
-
-if __name__ == '__main__':
-    # check_detector("/home/pcorchoc/Research/WEAVE-Apertif/weave_fl/supercube_2963103.fit")
-    parser = argparse.ArgumentParser()
-    parser.add_argument("raw_path", metavar="N", type=str, nargs="+",
-                        help="Path to raws")
-    parser.add_argument("--qctest", nargs="+", help="QC test function to be applied to the data",
-                        dest="qctest")
-    parser.add_argument("--output", nargs=1, help="Output directory to store QC products",
-                        dest="output", default=os.path.join(os.getcwd(), "output"))
-    parser.add_argument("--overwrite", nargs=1, help="Overwrite output products from previous runs (default is True)",
-                        dest="overwrite", default=False)
-    parser.add_argument("--html", action=argparse.BooleanOptionalAction,
-                        help="Creates an HTML file to visualize the results",
-                        dest="html", default=False)
-    args = parser.parse_args()
-
-    print(f"Output directory: {args.output}")
-    makedir(args.output, overwrite=False)
-    if args.html:
-        master_page = HTMLPage(title='QC WEAVE RAW')
-
-    for i, path in enumerate(args.raw_path):
-        print(f"\nChecking raw {i+1} out of {len(args.raw_path)}\n")
-        outdir = os.path.join(args.output, os.path.basename(path + f"_{i}"))
-        makedir(outdir, overwrite=args.overwrite)
-
-        qc_tests = QC_tests(path, output=outdir)
-        if args.html:
-            qc_page = HTMLPage(os.path.basename(outdir))
-        for test in args.qctest:
-            print(f"\nApplying **{test}**\n")
-            test_method = getattr(qc_tests, test)
-            output = test_method()
-            if args.html:
-                qc_page.add_plot_section(test, output)
-            print("...Check completed...\n")
-        qc_tests.raw.close_hdul()
-        if args.html:
-            qc_page.save_page(os.path.join(outdir, "index.html"))
-            master_page.add_reference(os.path.join(outdir, "index.html"),
-                                      qc_page.title)
-    if args.html:
-        master_page.save_page(os.path.join(args.output, "index.html"))
-
-    if len(os.listdir(args.output)) == 0:
-        print("No product was made, removing output directory")
-        os.rmdir(args.output)

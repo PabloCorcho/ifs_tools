@@ -68,7 +68,7 @@ class QC_tests(QCtestBase):
         fig.savefig(output)
         plt.close(fig)
         if self.html:
-            self.html_page.add_plot_section("White image", output)
+            self.html_page.add_plot_section("White image", os.path.basename(output))
         return output
 
 
@@ -101,6 +101,6 @@ class QC_tests(QCtestBase):
         fig.savefig(output)
         plt.close(fig)
         if self.html:
-            self.html_page.add_plot_section("Ranked spectra", output)
+            self.html_page.add_plot_section("Ranked spectra", os.path.basename(output))
         return output
 

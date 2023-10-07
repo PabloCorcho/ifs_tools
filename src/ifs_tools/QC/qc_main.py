@@ -115,7 +115,7 @@ if __name__ == "__main__":
             qc_tests.html_page.save_page(
                 os.path.join(outdir, f"index_{args.qcmode}.html"))
             master_page.add_reference(
-                os.path.join(outdir, f"index_{args.qcmode}.html"),
+                os.path.join(os.path.basename(outdir), f"index_{args.qcmode}.html"),
                             qc_tests.html_page.title)
     if args.html:
         master_page.save_page(os.path.join(args.output, "index.html"))
