@@ -115,7 +115,7 @@ class QC_tests(QCtestBase):
             data = self.data_container.hdul[hdul_index].data
             ax = ax_pair[0]
             h, xedges, _ = ax.hist(
-                data.flatten(), bins='auto',
+                data.flatten(), bins=100,
                 range=[-1000, 70000], log=True)
             ax.set_xlabel("Counts/ADU")
             
@@ -126,7 +126,11 @@ class QC_tests(QCtestBase):
 
             inax = ax_pair[1]
             inax.set_title(f"mean={mean:.1f} +- {nsigma}*{sigma:.1f}")
-            inax.step(xbins, h)
+            h, xedges, _ = inax.hist(
+                data.flatten(), bins=100,
+                range=[mean - nsigma * sigma,
+                       mean + nsigma * sigma],
+                       log=True)
             inax.set_xlim(mean - 5 * sigma, mean + 5 * sigma)
             inax.set_xlabel("Counts/ADU")
             inax.set_yscale('log')
