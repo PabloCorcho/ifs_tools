@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: ifs-tools
+Version: 0.0.1
+Summary: Utilities to work with IFS data
+Author-email: Pablo Corcho Caballero <corchocaballeropablo@gmail.com>
+Project-URL: Homepage, https://github.com/PabloCorcho/ifs_tools
+Project-URL: Bug Tracker, https://github.com/PabloCorcho/ifs_tools/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Utilities to work with IFS data
