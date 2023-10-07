@@ -11,13 +11,12 @@ def create_html_section(title, contents):
 
 def create_html_table(data):
     html = "<table>\n"
-
-    html +="<tr>"
-    for key, val in data.items():
-        html += f"<td>{key}</td><td>{val}</td>"
-    html += "</tr>\n"
+    for row in data:
+        html +="<tr>"
+        for entry in row:
+            html += f"<td>{entry}</td>"
+        html += "</tr>\n"
     html += "</table>"
-
     return html
 
 def create_html_page(title="UNKNOWN", content=""):

@@ -14,6 +14,7 @@ import numpy as np
 from astropy.wcs import WCS
 
 # WEAVE
+from ifs_tools.QC.QCtestBase import QCtestBase
 from ifs_tools.data_readers.weave.weave_raw import WEAVERaw
 from ifs_tools.html_tools.utils import HTMLPage
 
@@ -30,40 +31,32 @@ def makedir(path, overwrite=True):
     else:
         os.mkdir(path)
 
-class QC_tests(object):
+class QC_tests(QCtestBase):
     """
     Class containing tests.
     """
     def __init__(self, path_to_raw, output=None):
+        self.data_container = WEAVERaw(path_to_raw, load_hdul=True)
+        super().__init__(data_level="raw",
+                         name=self.data_container.hdul.filename(),
+                         survey="weave")
         self.output = output
-        self.raw = WEAVERaw(path_to_raw, load_hdul=True)
-
-    def load_yml_file(self, file_path):
-        with open(file_path, 'r') as file:
-            content = yaml.safe_load(file)
-        return content
-
-    def check_header(self, key_dict, hdul_idx=0):
-        info = self.raw.get_from_header(key_dict.keys(),
-                                         hdul_idx=hdul_idx)
-        for k, v, in info.items():
-            okey = True
-            if key_dict[k] != "None":
-                okey = key_dict[k][0] < v < key_dict[k][1]
-            print(f"{k}: {v} -- Okey: {okey}")
 
     def check_primary(self):
         detector_kw = self.load_yml_file(os.path.join(file_dir, "qc_params", "check_raw.yml"))
-        self.check_header(detector_kw)
+        checks = self.check_header(detector_kw)
+        if self.html:
+            self.html_page.add_table_section(title="Primary Header checks",
+                                             data=checks)
     
     def check_raw(self):
         fig, axs = plt.subplots(nrows=2, ncols=1,
                                 figsize=(10, 20),
                                 gridspec_kw=dict(wspace=0.35))
-        fig.suptitle(f'{self.raw.hdul.filename()}',
+        fig.suptitle(f'{self.data_container.hdul.filename()}',
                      fontsize=14, fontweight='bold')
         for ax, hdul_index in zip(axs, [1, 2]):
-            data = self.raw.hdul[hdul_index].data
+            data = self.data_container.hdul[hdul_index].data
             mappable = ax.imshow(data, cmap='Spectral', norm=LogNorm(),
                                  origin='lower')
 
@@ -102,12 +95,14 @@ class QC_tests(object):
             inax.set_xlim(ax.get_ylim())
             inax.set_xticklabels([])
 
-            plt.colorbar(mappable, ax=ax, label=self.raw.hdul[1].header.get(
+            plt.colorbar(mappable, ax=ax, label=self.data_container.hdul[1].header.get(
             'BUNIT', "Unknown BUNIT"), location='left')
         output = os.path.join(self.output, "raw_image.png")
         fig.savefig(output,
                     bbox_inches='tight')
         plt.close(fig)
+        if self.html:
+            self.html_page.add_plot_section("Raw display", output)
         return output
 
     def check_histogram(self):
@@ -115,7 +110,7 @@ class QC_tests(object):
         fig, axs = plt.subplots(nrows=2, ncols=2,
                                 figsize=(15, 10))
         for ax_pair, hdul_index in zip(axs, [1, 2]):
-            data = self.raw.hdul[hdul_index].data
+            data = self.data_container.hdul[hdul_index].data
             ax = ax_pair[0]
             h, xedges, _ = ax.hist(
                 data.flatten(), bins='auto',
@@ -135,6 +130,9 @@ class QC_tests(object):
             inax.set_yscale('log')
         output = os.path.join(self.output, "raw_hist.png")
         fig.savefig(output, bbox_inches='tight')
+        plt.close(fig)
+        if self.html:
+            self.html_page.add_plot_section("Raw histogram", output)
         return output
         
             

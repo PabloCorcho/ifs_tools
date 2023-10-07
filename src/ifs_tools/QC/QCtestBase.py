@@ -27,7 +27,7 @@ class QCtestBase(object):
     def check_header(self, key_dict, hdul_idx=0):
         info = self.data_container.get_from_header(key_dict.keys(),
                                          hdul_idx=hdul_idx)
-        checks = {}
+        checks = []
         for k, v, in info.items():
             okey = True
             if type(v) is not str and key_dict[k] != "None":
@@ -36,6 +36,6 @@ class QCtestBase(object):
                 okey = v == key_dict[k][0]
             else:
                 okey = "N/A"
-            checks[k] = okey
+            checks.append((k, v, okey))
             # print(f"{k}: {v} -- Okey: {okey}")
-        return info, checks
+        return checks
