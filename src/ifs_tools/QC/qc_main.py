@@ -34,10 +34,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("file_path", metavar="N", type=str, nargs="+",
                         help="Path to file(s)")
+    parser.add_argument("--search_in", type=str, help="If selected, will search for all fits file within the given directory",
+                        dest="search_in", action=argparse.BooleanOptionalAction,
+                        default=False)
     parser.add_argument("--survey", type=str, help="Survey/instrument to be used (default=weave)",
-                        dest="survey", default="weave")
+                        dest="survey", required=True)
     parser.add_argument("--qctest", nargs="+", help="QC test function to be applied to the data",
-                    dest="qctest")
+                    dest="qctest", required=True)
     parser.add_argument("--qcmode", type=str, help="QC test level of every qc test: raw, cube, or prod",
                     dest="qcmode", required=True)
     parser.add_argument("--output", nargs=1, help="Output directory to store QC products of all files.",
@@ -50,6 +53,15 @@ if __name__ == "__main__":
     print("\n\n\nParsing input arguments")
     args = parser.parse_args()
 
+    if args.search_in:
+        if len(args.file_path) != 1:
+            raise NotImplementedError("Provide only one directory")
+        from glob import glob
+        print(f"Searching for files within input directory:\n  {args.file_path[0]}")
+        files_found = glob(os.path.join(args.file_path[0], "*.fit*"))
+        print(f"Number of files found: {len(files_found)}",
+              "\n", '\n '.join(files_found))
+        args.file_path = files_found
     n_files = len(args.file_path)
     n_qc_test = len(args.qctest)
 
