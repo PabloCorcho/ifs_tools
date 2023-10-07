@@ -4,15 +4,16 @@ def create_html_image(image_path):
 
 def create_html_section(title, contents):
     return f"""
+    <hr>
     <section>
         <h2>{title}</h2>
         {contents}
     </section>"""
 
 def create_html_table(data):
-    html = "<table>\n"
+    html = "<table style=\"border:1px solid black;border-collapse:collapse; width:60%\">\n"
     for row in data:
-        html +="<tr>"
+        html +="<tr style=\"border:1px solid black\">"
         for entry in row:
             html += f"<td>{entry}</td>"
         html += "</tr>\n"
@@ -43,9 +44,10 @@ class HTMLPage(object):
             self.page_src = create_html_page(title, content)
 
     def load_page(self, path):
-        print("Loading HTML page")
-        with open(path, "r") as f:
-            self.page_src = f.read()
+        print(f"Loading HTML page: {path}")
+        f = open(path, "r")
+        self.page_src = f.read()
+
         title_pos_ini = self.page_src.find("<title>")
         title_pos_end = self.page_src.find("</title>")
         self.title = self.page_src[title_pos_ini + 7:title_pos_end]
@@ -54,7 +56,7 @@ class HTMLPage(object):
         print("Including reference {path}")
         pos = self.page_src.find("</body>")
         self.page_src = (self.page_src[:pos]
-                         + f"<a href=\"{path}\">{name}</a>\n"
+                         + f"<a href=\"{path}\">{name}</a><br />\n"
                          + self.page_src[pos:])
     
     def add_table_section(self, title, data, desc=""):

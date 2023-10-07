@@ -15,14 +15,16 @@ def makedir(path, overwrite=True):
             os.mkdir(path)
             return True
         else:
+            print(f"{path} already exists")
             return False
     else:
         os.mkdir(path)
         return True
 
 def is_html_page(path):
-    page = os.path.isfile(os.path.join(path, "index.html"))
-    if page:
+    page = os.path.join(path, "index.html")
+    ispage = os.path.isfile(page)
+    if ispage:
         return page
     else:
         return None
@@ -45,7 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("--html", action=argparse.BooleanOptionalAction,
                     help="Create an HTML file to visualize the results (default=True)",
                     dest="html", default=True)
-    print("Parsing input arguments")
+    print("\n\n\nParsing input arguments")
     args = parser.parse_args()
 
     n_files = len(args.file_path)
@@ -78,31 +80,31 @@ if __name__ == "__main__":
         page_path = is_html_page(args.output)
         if page_path is None:
             print("Initialising master HTML page")
-            master_page = HTMLPage(title=f"QC {args.survey} {args.qcmode}")
+            master_page = HTMLPage(title=f"QC reports")
         else:
+            print("Using existing HTML report")
             master_page = HTMLPage(path=page_path)
 
-    # Run the tests    
+    # Run the tests
     for i, path in enumerate(args.file_path):
-        print(f"\nChecking raw {i+1} out of {len(args.file_path)}\n")
+        print(f"\nChecking {args.qcmode} {i+1} out of {len(args.file_path)}\n")
         outdir = os.path.join(args.output, os.path.basename(path + f"_{i}"))
         makedir(outdir, overwrite=args.overwrite)
 
-        qc_tests = module.QC_tests(path, output=outdir)
-        if args.html:
-            qc_page = HTMLPage(title=os.path.basename(outdir))
+        qc_tests = module.QC_tests(path, output=outdir,
+                                   html=args.html)
         for test in args.qctest:
             print(f"\nApplying **{test}**\n")
             test_method = getattr(qc_tests, test)
             output = test_method()
-            if args.html:
-                qc_page.add_plot_section(test, output)
             print("...Check completed...\n")
-        qc_tests.raw.close_hdul()
+        qc_tests.data_container.close_hdul()
         if args.html:
-            qc_page.save_page(os.path.join(outdir, "index.html"))
-            master_page.add_reference(os.path.join(outdir, f"index_{args.qcmode}.html"),
-                                      qc_page.title)
+            qc_tests.html_page.save_page(
+                os.path.join(outdir, f"index_{args.qcmode}.html"))
+            master_page.add_reference(
+                os.path.join(outdir, f"index_{args.qcmode}.html"),
+                            qc_tests.html_page.title)
     if args.html:
         master_page.save_page(os.path.join(args.output, "index.html"))
 

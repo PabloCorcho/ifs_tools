@@ -35,11 +35,12 @@ class QC_tests(QCtestBase):
     """
     Class containing tests.
     """
-    def __init__(self, path_to_raw, output=None):
+    def __init__(self, path_to_raw, output=None, **kwargs):
         self.data_container = WEAVERaw(path_to_raw, load_hdul=True)
         super().__init__(data_level="raw",
                          name=self.data_container.hdul.filename(),
-                         survey="weave")
+                         survey="weave",
+                         **kwargs)
         self.output = output
 
     def check_primary(self):
@@ -52,11 +53,12 @@ class QC_tests(QCtestBase):
     def check_raw(self):
         fig, axs = plt.subplots(nrows=2, ncols=1,
                                 figsize=(10, 20),
-                                gridspec_kw=dict(wspace=0.35))
-        fig.suptitle(f'{self.data_container.hdul.filename()}',
-                     fontsize=14, fontweight='bold')
+                                gridspec_kw=dict(wspace=0.5))
+
         for ax, hdul_index in zip(axs, [1, 2]):
             data = self.data_container.hdul[hdul_index].data
+            name = self.data_container.hdul[hdul_index].name
+            ax.set_title(name)
             mappable = ax.imshow(data, cmap='Spectral', norm=LogNorm(),
                                  origin='lower')
 
