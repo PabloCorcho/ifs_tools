@@ -58,7 +58,8 @@ if __name__ == "__main__":
             raise NotImplementedError("Provide only one directory")
         from glob import glob
         print(f"Searching for files within input directory:\n  {args.file_path[0]}")
-        files_found = glob(os.path.join(args.file_path[0], "*.fit*"))
+        files_found = sorted(
+            glob(os.path.join(args.file_path[0], "*.fit*")))
         print(f"Number of files found: {len(files_found)}",
               "\n", '\n '.join(files_found))
         args.file_path = files_found

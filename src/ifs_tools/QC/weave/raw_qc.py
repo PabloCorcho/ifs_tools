@@ -59,7 +59,9 @@ class QC_tests(QCtestBase):
             data = self.data_container.hdul[hdul_index].data
             name = self.data_container.hdul[hdul_index].name
             ax.set_title(name)
-            mappable = ax.imshow(data, cmap='Spectral', norm=LogNorm(),
+            mappable = ax.imshow(data, cmap='nipy_spectral',
+                                 norm=LogNorm(vmin=np.nanpercentile(data, 1),
+                                              vmax=np.nanpercentile(data, 99)),
                                  origin='lower')
 
             column_index = data.shape[1] // 2
