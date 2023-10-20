@@ -45,8 +45,9 @@ if __name__ == "__main__":
                     dest="qcmode", required=True)
     parser.add_argument("--output", nargs=1, help="Output directory to store QC products of all files.",
                     dest="output", default=os.path.join(os.getcwd(), "output"))
-    parser.add_argument("--overwrite", nargs=1, help="Overwrite output products from previous runs (default is False)",
-                    dest="overwrite", default=False)
+    parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction,
+                        help="Overwrite output products from previous runs (default is False)",
+                        dest="overwrite", default=False)
     parser.add_argument("--html", action=argparse.BooleanOptionalAction,
                     help="Create an HTML file to visualize the results (default=True)",
                     dest="html", default=True)
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     # Prepare HTML master page
     if args.html:
         page_path = is_html_page(args.output)
-        if page_path is None:
+        if page_path is None or args.overwrite:
             print("Initialising master HTML page")
             master_page = HTMLPage(title=f"QC reports")
         else:
